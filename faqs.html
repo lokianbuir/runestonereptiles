@@ -32,16 +32,35 @@
     overflow-x: hidden;
   }
 
+  /* ── Alert bar ── */
+  .alert-bar {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 200;
+    background: var(--danger);
+    color: #fff;
+    padding: 0.55rem 2.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.82rem;
+    font-weight: 500;
+    letter-spacing: 0.03em;
+  }
+
+  .alert-icon { font-size: 1rem; flex-shrink: 0; }
+
   /* ── Nav ── */
   nav {
     position: fixed;
-    top: 0; left: 0; right: 0;
+    top: 2.2rem;
+    left: 0; right: 0;
     z-index: 100;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 1rem 2.5rem;
-    background: rgba(28, 27, 24, 0.92);
+    padding: 0.9rem 2.5rem;
+    background: rgba(28, 27, 24, 0.95);
     backdrop-filter: blur(12px);
     border-bottom: 1px solid rgba(200,168,75,0.2);
   }
@@ -74,10 +93,61 @@
   .nav-links a:hover,
   .nav-links a.active { opacity: 1; color: var(--gold); }
 
+  .nav-hamburger {
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    gap: 5px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+  }
+
+  .nav-hamburger span {
+    display: block;
+    width: 24px;
+    height: 2px;
+    background: var(--cream);
+    transition: transform 0.25s, opacity 0.25s;
+  }
+
+  .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+  .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  .nav-drawer {
+    display: none;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    z-index: 99;
+    background: rgba(28, 27, 24, 0.98);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2.5rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+  }
+
+  .nav-drawer.open { opacity: 1; pointer-events: all; }
+
+  .nav-drawer a {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.5rem;
+    letter-spacing: 0.08em;
+    color: var(--cream);
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .nav-drawer a:hover { color: var(--gold); }
+
   /* ── Page header ── */
   .page-header {
     background: var(--stone);
-    padding: 9rem 2.5rem 4rem;
+    padding: 10rem 2.5rem 4rem;
     position: relative;
     overflow: hidden;
   }
@@ -356,9 +426,14 @@
     color: rgba(245,240,232,0.3);
   }
 
-  @media (max-width: 640px) {
-    nav { padding: 1rem 1.25rem; }
-    .page-header { padding: 7rem 1.25rem 3rem; }
+  @media (max-width: 768px) {
+    .nav-links { display: none; }
+    .nav-hamburger { display: flex; }
+    .nav-drawer { display: flex; }
+
+    nav { top: 2rem; padding: 0.9rem 1.25rem; }
+    .alert-bar { padding: 0.55rem 1.25rem; font-size: 0.76rem; }
+    .page-header { padding: 8rem 1.25rem 3rem; }
     .faq-section { padding: 3rem 1.25rem; }
     .cta-strip { padding: 3rem 1.25rem; }
     footer { flex-direction: column; gap: 0.5rem; text-align: center; }
@@ -367,6 +442,11 @@
 </head>
 <body>
 
+<div class="alert-bar">
+  <span class="alert-icon">⚠</span>
+  <span><strong>Snake Season is Active</strong> — Spring &amp; summer bring increased snake activity across Central Texas. Stay vigilant.</span>
+</div>
+
 <nav>
   <a class="nav-logo" href="index.html">Runestone Reptiles</a>
   <ul class="nav-links">
@@ -374,7 +454,16 @@
     <li><a href="faqs.html" class="active">FAQ</a></li>
     <li><a href="index.html#contact">Contact</a></li>
   </ul>
+  <button class="nav-hamburger" id="hamburger" aria-label="Open menu" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+
+<div class="nav-drawer" id="nav-drawer" aria-hidden="true">
+  <a href="index.html" class="drawer-link">Home</a>
+  <a href="faqs.html" class="drawer-link">FAQ</a>
+  <a href="index.html#contact" class="drawer-link">Contact</a>
+</div>
 
 <header class="page-header">
   <div class="header-rule"></div>
@@ -492,6 +581,21 @@
       }
     });
   });
+
+  const hamburger = document.getElementById('hamburger');
+  const drawer = document.getElementById('nav-drawer');
+
+  function toggleMenu(open) {
+    hamburger.classList.toggle('open', open);
+    drawer.classList.toggle('open', open);
+    hamburger.setAttribute('aria-expanded', open);
+    drawer.setAttribute('aria-hidden', !open);
+    document.body.style.overflow = open ? 'hidden' : '';
+  }
+
+  hamburger.addEventListener('click', () => toggleMenu(!drawer.classList.contains('open')));
+  drawer.querySelectorAll('a').forEach(link => link.addEventListener('click', () => toggleMenu(false)));
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') toggleMenu(false); });
 </script>
 
 </body>
